@@ -9,13 +9,8 @@ jobs:
     steps:
       - name: Ping Supabase to prevent idle pause
         run: |
-          # The /auth/v1/health endpoint is always public, requires no tables/RLS, 
-          # and reliably returns 200 OK. This is enough to register activity.
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${{ vars.SUPABASE_URL }}/auth/v1/health")
-          echo "Supabase Health Check HTTP Status: $HTTP_CODE"
-          
-          if [ "$HTTP_CODE" -ne 200 ]; then
-            echo "❌ Failed to ping Supabase. Status: $HTTP_CODE"
-            exit 1
-          fi
+          # -f (--fail) makes curl exit with code 22 if the HTTP status is >= 400
+          # -s (--silent) hides the progress bar
+          # -S (--show-error) ensures errors are still printed if it fails
+          curl -fsS "${{ vars.SUPABASE_URL }}/auth/v1/health"
           echo "✅ Supabase keep-alive ping successful!"
