@@ -12,4 +12,4 @@ jobs:
           curl -fsS -o /dev/null -w "%{http_code}\n" \
             -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ vars.SUPABASE_ANON_KEY }}" \
-            "${{ vars.SUPABASE_URL }}/rest/v1/"
+            "${{ vars.SUPABASE_URL }}/rest/v1/projects?select=id&limit=1"
