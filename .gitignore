@@ -1,0 +1,18 @@
+# deps / build
+node_modules/
+dist/
+*.tsbuildinfo
+
+# secrets — NEVER in history (Supabase anon key is a JWT; gitleaks flags it)
+.env
+.env.*
+!.env.example
+*.local
+
+# noise
+.DS_Store
+Thumbs.db
+npm-debug.log*
+yarn-error.log*
+*.log
+.cache/

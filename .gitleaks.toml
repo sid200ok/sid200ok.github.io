@@ -1,0 +1,7 @@
+title = "sid200ok.github.io"
+
+[allowlist]
+description = "Public Supabase anon config is intentionally committed"
+paths = [
+  '''assets/js/config\.js'''
+]
