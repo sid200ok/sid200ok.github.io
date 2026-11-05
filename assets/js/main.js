@@ -1,9 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
-import "./auth.js"; // This automatically initializes the auth UI
+import "./auth.js"; // Initializes auth UI
 
-// Initialize Supabase client for future use (e.g., fetching projects)
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-console.log("✅ Supabase client initialized. Auth module loaded.");
+// Export the client so other modules (like incubation.js) can use it
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// TODO: Next step will be adding incubation.js to fetch and render projects!
+console.log("✅ Supabase client initialized. Auth & Incubation modules ready.");
+
+// Import incubation logic after client is ready
+import("./incubation.js");
