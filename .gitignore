@@ -20,3 +20,4 @@ yarn-error.log*
 # Local sid server state files
 .sid.pid
 .sid.port
+assets/js/config.js
