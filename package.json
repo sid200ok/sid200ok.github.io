@@ -1,26 +1,19 @@
 {
-  "name": "sid200ok.github.io",
+  "name": "sid200ok-github-io",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "type": "module",
+  "description": "Personal portfolio — sid200ok.github.io",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "env:check":  "bash scripts/env-bootstrap.sh",
+    "config":     "node scripts/inject-config.mjs",
+    "ui:ensure":  "node scripts/ensure-contact-ui.mjs",
+    "build":      "bash scripts/build-pages.sh",
+    "smoke":      "bash scripts/smoke-test.sh",
+    "db:push":    "npx supabase db push --remote",
+    "scan":       "docker run --rm -v \"$PWD:/repo\" zricethezav/gitleaks:latest detect --no-git --source /repo --redact --config /repo/.gitleaks.toml --exit-code 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/sid200ok/sid200ok.github.io.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/sid200ok/sid200ok.github.io/issues"
-  },
-  "homepage": "https://github.com/sid200ok/sid200ok.github.io#readme",
   "devDependencies": {
-    "@tailwindcss/forms": "^0.5.11",
-    "@tailwindcss/typography": "^0.5.20",
-    "tailwindcss": "^3.4.19"
+    "supabase": "^2.22.9"
   }
 }

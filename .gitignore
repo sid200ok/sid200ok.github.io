@@ -1,23 +1,27 @@
-# deps / build
+# dependencies / build output
 node_modules/
 dist/
 *.tsbuildinfo
 
-# secrets — NEVER in history (Supabase anon key is a JWT; gitleaks flags it)
+# secrets and local env — never commit real values
 .env
 .env.*
 !.env.example
 *.local
 
-# noise
+# generated browser config
+assets/js/config.js
+assets/js/config.js.tmp
+
+# local sid runtime state
+.sid.pid
+.sid.port
+.sid.log
+
+# editor / OS noise
 .DS_Store
 Thumbs.db
 npm-debug.log*
 yarn-error.log*
 *.log
 .cache/
-
-# Local sid server state files
-.sid.pid
-.sid.port
-assets/js/config.js

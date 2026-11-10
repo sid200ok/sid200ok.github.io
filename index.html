@@ -12,4 +12,34 @@
 <header id="site-header"></header>
 <main><h1>Siddhant Kumar</h1><p>Full‑Stack · VoIP & Telephony · AI</p></main>
 <script type="module" src="/assets/js/main.js"></script>
+
+<section id="contact" class="contact-section" aria-labelledby="contact-heading">
+  <h2 id="contact-heading">Contact</h2>
+  <form id="contact-form" novalidate>
+    <label for="contact-name">Name</label>
+    <input id="contact-name" name="name" required maxlength="120" autocomplete="name">
+
+    <label for="contact-email">Email</label>
+    <input id="contact-email" name="email" type="email" required maxlength="254" autocomplete="email">
+
+    <label for="contact-message">Message</label>
+    <textarea id="contact-message" name="message" required maxlength="5000" rows="5"></textarea>
+
+    <!-- Honeypot field: humans do not see/fill this -->
+    <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"
+           style="position:absolute;left:-9999px;top:-9999px;height:0;width:0;opacity:0">
+
+    <button type="submit">Send message</button>
+    <p data-contact-status role="status" aria-live="polite"></p>
+  </form>
+</section>
+
+
+
+
+
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/contact.js"></script>
+
 </body></html>

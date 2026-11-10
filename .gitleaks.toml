@@ -1,7 +1,15 @@
-title = "sid200ok.github.io"
+title = "sid200ok.github.io gitleaks config"
+
+[extend]
+useDefault = true
 
 [allowlist]
-description = "Public Supabase anon config is intentionally committed"
+description = "Ignore template, example, and gitignored runtime files in local --no-git scans"
 paths = [
-  '''assets/js/config\.js'''
+  '''^\.env$''',
+  '''^\.env\.example$''',
+  '''^assets/js/config\.template\.js$''',
+  '''^assets/js/config\.js$''',
+  '''^assets/js/config\.js\.tmp$''',
+  '''^supabase/config\.toml$''',
 ]
