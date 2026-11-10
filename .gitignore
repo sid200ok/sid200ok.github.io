@@ -16,3 +16,7 @@ npm-debug.log*
 yarn-error.log*
 *.log
 .cache/
+
+# Local sid server state files
+.sid.pid
+.sid.port
