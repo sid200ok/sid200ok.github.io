@@ -1,4 +1,5 @@
 // assets/js/contact.js
+// Final production-ready contact form handler with bot protection and correct schema mapping.
 (function () {
   'use strict';
 
@@ -9,25 +10,24 @@
     return;
   }
 
-  if (
-    cfg.SUPABASE_ANON_KEY.startsWith('sb_secret_') ||
-    cfg.SUPABASE_ANON_KEY.startsWith('sb_service_')
-  ) {
-    console.error('[contact] Refusing to run: secret/service key in browser config');
+  if (cfg.SUPABASE_ANON_KEY.startsWith('sb_secret_') || cfg.SUPABASE_ANON_KEY.startsWith('sb_service_')) {
+    console.error('[contact] Refusing to run: secret/service key detected in browser config');
     return;
   }
 
   const form = document.getElementById('contact-form');
   if (!form) return;
 
+  // Bot guard: record when form became interactive (min 3s required)
   const FORM_OPEN_TS = Date.now();
   const MIN_ELAPSED_MS = 3000;
 
-  let honeypot = form.querySelector('input[name="website"]');
+  // Ensure honeypot exists (invisible to humans, filled by dumb bots)
+  let honeypot = form.querySelector('input[name="honeypot"], input[name="website"]');
   if (!honeypot) {
     honeypot = document.createElement('input');
     honeypot.type = 'text';
-    honeypot.name = 'website';
+    honeypot.name = 'honeypot';
     honeypot.tabIndex = -1;
     honeypot.autocomplete = 'off';
     honeypot.setAttribute('aria-hidden', 'true');
@@ -35,6 +35,7 @@
     form.appendChild(honeypot);
   }
 
+  // Ensure status element exists
   let statusEl = form.querySelector('[data-contact-status]');
   if (!statusEl) {
     statusEl = document.createElement('p');
@@ -62,25 +63,43 @@
 
     const fd = new FormData(form);
 
+    // Honeypot: if filled, behave as success but do NOT send to DB
     if (honeypot && honeypot.value.trim() !== '') {
       setStatus('Message sent — thank you!', true);
       form.reset();
       return;
     }
 
+    // Timing guard: reject instant submissions (bots)
     if (Date.now() - FORM_OPEN_TS < MIN_ELAPSED_MS) {
       setStatus('Please take a moment before sending.', false);
       return;
     }
 
-    const name    = (fd.get('name')    || '').toString().trim();
-    const email   = (fd.get('email')   || '').toString().trim();
-    const message = (fd.get('message') || '').toString().trim();
+    // Accept 'full_name' or 'name' from HTML, but we will send 'full_name' to DB
+    const fullName  = (fd.get('full_name') || fd.get('name') || '').toString().trim();
+    const email     = (fd.get('email') || '').toString().trim();
+    const message   = (fd.get('message') || '').toString().trim();
 
-    if (!name || !email || !message) { setStatus('All fields are required.', false); return; }
-    if (name.length > 120)           { setStatus('Name is too long.', false); return; }
-    if (email.length > 254 || !validateEmail(email)) { setStatus('Please enter a valid email.', false); return; }
-    if (message.length > 5000)       { setStatus('Message is too long.', false); return; }
+    if (!fullName || !email || !message) {
+      setStatus('All fields are required.', false);
+      return;
+    }
+
+    if (fullName.length > 120) {
+      setStatus('Name is too long.', false);
+      return;
+    }
+
+    if (email.length > 254 || !validateEmail(email)) {
+      setStatus('Please enter a valid email.', false);
+      return;
+    }
+
+    if (message.length > 5000) {
+      setStatus('Message is too long.', false);
+      return;
+    }
 
     const btn = form.querySelector('button[type="submit"]');
     submitting = true;
@@ -91,6 +110,7 @@
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
+      // CRITICAL: The database column is 'full_name', NOT 'name'
       const res = await fetch(`${cfg.SUPABASE_URL}/rest/v1/contact_messages`, {
         method: 'POST',
         signal: controller.signal,
@@ -100,7 +120,11 @@
           'Content-Type': 'application/json',
           'Prefer': 'return=minimal',
         },
-        body: JSON.stringify({ name, email, message }),
+        body: JSON.stringify({ 
+          full_name: fullName, 
+          email: email, 
+          message: message 
+        }),
       });
 
       clearTimeout(timeoutId);
@@ -111,15 +135,21 @@
       } else {
         const body = await res.text().catch(() => '');
         console.error('[contact] HTTP', res.status, body.slice(0, 300));
-        if (res.status === 429)         setStatus('Too many requests. Try again later.', false);
-        else if (res.status === 401 || res.status === 403) setStatus('Config error. Try again later.', false);
-        else if (res.status === 404)    setStatus('Endpoint not found. Try again later.', false);
-        else                            setStatus('Send failed. Try again later.', false);
+
+        if (res.status === 429) {
+          setStatus('Too many requests. Please try again later.', false);
+        } else if (res.status === 401 || res.status === 403) {
+          setStatus('Send failed due to configuration. Please try again later.', false);
+        } else if (res.status === 404) {
+          setStatus('Send failed: endpoint not found. Please try again later.', false);
+        } else {
+          setStatus('Send failed. Please try again later.', false);
+        }
       }
     } catch (err) {
       clearTimeout(timeoutId);
       console.error('[contact]', err);
-      setStatus('Network error. Try again later.', false);
+      setStatus('Network error. Please try again later.', false);
     } finally {
       submitting = false;
       if (btn) btn.disabled = false;
