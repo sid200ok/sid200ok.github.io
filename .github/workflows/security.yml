@@ -1,0 +1,72 @@
+name: security
+on:
+  push: { branches: [main] }
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  gitleaks:
+    name: gitleaks (tree + full history)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # shallow clones hide committed-then-deleted leaks
+      - name: Resolve pinned gitleaks image
+        id: img
+        run: |
+          set -euo pipefail
+          TAG="${GITLEAKS_PIN:-}"
+          if [ -z "$TAG" ]; then
+            TAG="$(curl -fsSL https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
+                   | sed -n 's/.*"tag_name": "\(v[0-9.]*\)".*/\1/p' | head -n1)"
+          fi
+          [ -n "$TAG" ] || { echo "::error::cannot resolve gitleaks version"; exit 1; }
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"; echo "pinning ${TAG}"
+      - name: Positive control
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/probe
+          printf 'aws_access_key_id = AKIAIOSFODNN7EXAMPLE\nsupabase_service_role = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.CTRL.CTRLSIGVALUE0\npostgres://u:Str0ngP@ss@dbs.example.supabase.co:5432/postgres\n' > /tmp/probe/planted.txt
+          set +e
+          docker run --rm -v /tmp/probe:/scan:ro -v "$PWD/.gitleaks.toml:/cfg/.gitleaks.toml:ro" \
+            "zricethezav/gitleaks:${{ steps.img.outputs.tag }}" \
+            dir /scan --config /cfg/.gitleaks.toml --redact --no-banner --exit-code 1 >/dev/null 2>&1
+          rc=$?; set -e
+          if [ "$rc" -eq 1 ]; then echo "positive control fired";
+          elif [ "$rc" -eq 0 ]; then echo "::error::positive control silent — allowlist too broad"; exit 1
+          else echo "::error::harness failure ($rc)"; exit 1; fi
+      - name: Scan working tree
+        run: |
+          set +e
+          docker run --rm -v "$PWD:/scan:ro" -v "$PWD/.gitleaks.toml:/cfg/.gitleaks.toml:ro" \
+            "zricethezav/gitleaks:${{ steps.img.outputs.tag }}" \
+            dir /scan --config /cfg/.gitleaks.toml --redact --no-banner --exit-code 1
+          rc=$?; set -e
+          [ "$rc" -eq 0 ] || { echo "::error::secret in working tree or harness failure ($rc)"; exit 1; }
+      - name: Scan full git history
+        run: |
+          set +e
+          docker run --rm -v "$PWD:/scan:ro" -v "$PWD/.gitleaks.toml:/cfg/.gitleaks.toml:ro" \
+            "zricethezav/gitleaks:${{ steps.img.outputs.tag }}" \
+            git /scan --config /cfg/.gitleaks.toml --log-opts=--all --redact --no-banner --exit-code 1
+          rc=$?; set -e
+          [ "$rc" -eq 0 ] || { echo "::error::secret in git history or harness failure ($rc)"; exit 1; }
+  dotenv-lint:
+    name: no .env in the index
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          set -euo pipefail
+          if git ls-files --error-unmatch .env >/dev/null 2>&1; then
+            echo "::error::.env is TRACKED. Fix: git rm --cached .env"; exit 1; fi
+          tracked="$(git ls-files | grep -E '(^|/)\.env(\.|$)' | grep -v '\.env\.example$' || true)"
+          if [ -n "$tracked" ]; then echo "::error::env files tracked:"; printf '%s\n' "$tracked"; exit 1; fi
+          echo "no env files tracked"

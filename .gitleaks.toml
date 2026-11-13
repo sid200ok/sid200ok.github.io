@@ -1,15 +1,57 @@
-title = "sid200ok.github.io gitleaks config"
+title = "sid200ok.github.io — gitleaks policy (v1, hardened)"
 
+# useDefault and [extend].path are MUTUALLY EXCLUSIVE. Never set both.
 [extend]
 useDefault = true
 
+# GLOBAL ALLOWLIST — MINIMAL ON PURPOSE.
+# A global allowlist entry suppresses the ENTIRE file, not just the matched line.
+# FORBIDDEN here: .env, .env.*, assets/js/config.js, dist/, supabase/config.toml.
+# Placeholders are muted by `stopwords` below instead.
 [allowlist]
-description = "Ignore template, example, and gitignored runtime files in local --no-git scans"
+description = "Vendored trees, VCS internals, and this policy file"
 paths = [
-  '''^\.env$''',
-  '''^\.env\.example$''',
-  '''^assets/js/config\.template\.js$''',
-  '''^assets/js/config\.js$''',
-  '''^assets/js/config\.js\.tmp$''',
-  '''^supabase/config\.toml$''',
+  '''(^|/)node_modules/''',
+  '''(^|/)\.git/''',
+  '''(^|/)\.gitleaks\.toml$''',
+  '''(^|/)\.gitleaksignore$''',
+  '''(^|/)\.venv/''',
+  '''(^|/)__pycache__/''',
+]
+stopwords = ["REPLACE_ME", "PLACEHOLDER", "EXAMPLEKEY", "changeme", "your-", "<your-", "000000000000"]
+
+[[rules]]
+id = "supabase-project-jwt"
+description = "Supabase PostgREST JWT (anon / service_role)"
+regex = '''eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}'''
+keywords = ["eyJ"]
+
+[[rules]]
+id = "supabase-service-role-marker"
+description = "service_role key adjacent to a long token"
+regex = '''(?i)service_role["'\s:=]{0,8}[A-Za-z0-9_\-\.]{30,}'''
+keywords = ["service_role"]
+
+[[rules]]
+id = "postgres-dsn-with-password"
+description = "Postgres/Supabase DSN carrying a password"
+regex = '''postgres(ql)?://[^\s:@/]{1,64}:([^\s:@/]{4,128})@[^\s/?'"]{1,255}'''
+keywords = ["postgres://", "postgresql://"]
+
+[[rules]]
+id = "cloudflare-tunnel-token"
+description = "Cloudflare tunnel / API token"
+regex = '''(?i)(CF_TUNNEL_TOKEN|CLOUDFLARE_API_TOKEN)["'\s:=]{0,8}[A-Za-z0-9_\-\.]{20,}'''
+keywords = ["cf_tunnel_token", "cloudflare_api_token"]
+
+[[rules]]
+id = "openai-compatible-key"
+description = "sk-* style LLM key"
+regex = '''sk-(?:live-|proj-|ant-)?[A-Za-z0-9_\-]{20,}'''
+keywords = ["sk-"]
+
+[rules.allowlist]
+regexes = [
+  '''AKIAIOSFODNN7EXAMPLE''',
+  '''wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY''',
 ]

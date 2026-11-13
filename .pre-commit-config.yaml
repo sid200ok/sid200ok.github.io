@@ -1,0 +1,68 @@
+# Pre-commit gate. Bypassable via --no-verify, which is exactly why
+# .github/workflows/security.yml re-runs the same scan server-side.
+minimum_pre_commit_version: "3.5.0"
+default_language_version:
+  python: python3
+repos:
+  - repo: local
+    hooks:
+      - id: forbid-dotenv-in-index
+        name: forbid committing .env files
+        entry: >-
+          .env / .env.local / .env.*.prod must never be committed.
+          Use .env.example as the template and keep .env gitignored.
+        language: fail
+        files: '(^|/)\.env(\.|$)'
+
+      - id: gitleaks-staged
+        name: gitleaks (staged index, pinned docker)
+        entry: scripts/gitleaks-staged.sh
+        language: script
+        pass_filenames: true
+        require_serial: true
+        files: >-
+          (?x)^(
+            .*\.env|.*\.example|
+            .*\.js|.*\.mjs|.*\.cjs|.*\.ts|.*\.tsx|.*\.jsx|
+            .*\.json|.*\.json5|.*\.jsonc|
+            .*\.toml|.*\.yaml|.*\.yml|
+            .*\.sql|.*\.sh|.*\.bash|
+            .*\.html|.*\.htm|.*\.css|.*\.scss|
+            .*\.py|.*\.md|.*\.txt|.*\.conf|.*\.ini
+          )$
+
+      - id: deny-merge-conflict-text
+        name: no conflict markers
+        entry: "<<<<<<< "
+        language: fail
+        types: [text]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: detect-private-key
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-symlinks
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        args: ["--markdown-linebreak-ext=md"]
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+      - id: check-json
+        exclude: '(^|/)tsconfig\.[^/]+\.json$'
+      - id: check-toml
+      - id: check-yaml
+        args: ["--allow-multiple-documents"]
+      - id: no-commit-to-branch
+        args: ["--branch", "main"]
+
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.10.0
+    hooks:
+      - id: shellcheck
+        args: ["--severity=warning", "--exclude=SC1091"]
