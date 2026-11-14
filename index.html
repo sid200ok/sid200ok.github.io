@@ -1,45 +1,403 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Siddhant Kumar — Full‑Stack / VoIP / AI</title>
-<link rel="stylesheet" href="/assets/css/app.css"/>
-<script type="importmap">
-{ "imports": {
-  "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2",
-  "lucide": "https://unpkg.com/lucide@latest"
-}}
-</script>
-</head><body>
-<header id="site-header"></header>
-<main><h1>Siddhant Kumar</h1><p>Full‑Stack · VoIP & Telephony · AI</p></main>
-<script type="module" src="/assets/js/main.js"></script>
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siddhant Kumar | Full-Stack · VoIP · AI Engineer</title>
+    <meta name="description" content="Full-Stack Developer, VoIP & Telephony Engineer, and AI System Developer. Building production-grade telecom infrastructure, AI voice agents, and scalable web platforms.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS (CDN for instant, build-free premium styling) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        slate: { 850: '#151e2e', 950: '#020617' },
+                        cyan: { 450: '#00aaff' }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Supabase Config (Injected by CI/CD or fallback for local dev) -->
+    <script src="assets/js/config.js"></script>
+    
+    <style>
+        body { background-color: #020617; color: #e2e8f0; }
+        .glass { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(148, 163, 184, 0.1); }
+        .gradient-text { background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 10px 40px -10px rgba(34, 211, 238, 0.15); }
+    </style>
+</head>
+<body class="antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
 
-<section id="contact" class="contact-section" aria-labelledby="contact-heading">
-  <h2 id="contact-heading">Contact</h2>
-  <form id="contact-form" novalidate>
-    <label for="contact-name">Name</label>
-    <input id="contact-name" name="name" required maxlength="120" autocomplete="name">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass border-b border-slate-800/50">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="#" class="text-xl font-bold tracking-tight text-white">SK<span class="text-cyan-400">.</span></a>
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
+                <a href="#about" class="hover:text-cyan-400 transition-colors">About</a>
+                <a href="#experience" class="hover:text-cyan-400 transition-colors">Experience</a>
+                <a href="#projects" class="hover:text-cyan-400 transition-colors">Projects</a>
+                <a href="#contact" class="px-4 py-2 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-all">Contact Me</a>
+            </div>
+        </div.>
+    </nav>
 
-    <label for="contact-email">Email</label>
-    <input id="contact-email" name="email" type="email" required maxlength="254" autocomplete="email">
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center justify-center pt-16 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-900/20 via-slate-950 to-slate-950 -z-10"></div>
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold uppercase tracking-wider mb-6">
+                <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span></span>
+                Available for Global Remote Roles
+            </div>
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6">
+                Siddhant <span class="gradient-text">Kumar</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-400 mb-8 max-w-2xl mx-auto leading-relaxed">
+                Full-Stack Developer · VoIP & Telephony Engineer · AI System Developer
+            </p>
+            <p class="text-slate-500 mb-10 max-w-xl mx-auto">
+                Building production-grade telecom infrastructure, AI voice agents, and scalable web platforms for global clients.
+           
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="#projects" class="px-8 py-3.5 rounded-full bg-cyan-500 text-slate-950 font-semibold hover:bg-cyan-400 transition-all flex items-center gap-2">
+                    View Projects <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </a>
+                <a href="https://github.com/S-V-J" target="_blank" class="px-8 py-3.5 rounded-full glass text-white font-semibold hover:bg-slate-800 transition-all flex items-center gap-2">
+                    <i data-lucide="github" class="w-5 h-5"></i> GitHub
+                </a>
+            </div>
+        </div>
+    </section>
 
-    <label for="contact-message">Message</label>
-    <textarea id="contact-message" name="message" required maxlength="5000" rows="5"></textarea>
+    <!-- About & Skills -->
+    <section id="about" class="py-24 bg-slate-950/50">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-16 items-start">
+                <div>
+                    <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                        <i data-lucide="user" class="w-8 h-8 text-cyan-400"></i> Professional Summary
+                    </h2>
+                    <p class="text-slate-400 leading-relaxed mb-6">
+                        Versatile Full-Stack Developer and VoIP Engineer who launched a professional career in enterprise technical support. Built deep domain expertise in telecom operations at TELUS Digital, then transitioned into independent freelance contracting, delivering sophisticated production-grade software for global clients in Switzerland, Germany, and India.
+                    </p>
+                    <p class="text-slate-400 leading-relaxed">
+                        Technical architecture expertise spans Asterisk/Kamailio PBX configuration, Python/FastAPI backends, React frontends, LLM-powered agentic workflows, and cloud infrastructure deployment. Published researcher and active open-source contributor.
+                    </p>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                        <i data-lucide="code-2" class="w-8 h-8 text-cyan-400"></i> Technical Stack
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-2">VoIP & Telephony</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-sm border border-slate-700">Asterisk</span>
+                                <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-sm border border-slate-700">Kamailio</span>
+                                <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-sm border border-slate-700">SIP / ISUP</span>
+                                <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-sm border border-slate-700">WebRTC</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-2">Backend & AI</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-sm border border-slate-700">Python</span>
+                                <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-sm border border-slate-700">FastAPI</span>
+                                <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-sm border border-slate-700">Node.js</span>
+                                <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-sm border border-slate-700">LLM APIs</span>
+                                <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-sm border border-slate-700">Agentic Workflows</span>
+                            </div>
+        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-2">Frontend & DevOps</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-sm border border-slate-700">React 18</span>
+                                <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-sm border border-slate-700">Next.js</span>
+                                <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-sm border border-slate-700">Docker</span>
+                                <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-sm border border-slate-700">Kubernetes</span>
+                                <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-sm border border-slate-700">GitHub Actions</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <!-- Honeypot field: humans do not see/fill this -->
-    <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"
-           style="position:absolute;left:-9999px;top:-9999px;height:0;width:0;opacity:0">
+    <!-- Experience -->
+    <section id="experience" class="py-24">
+        <div class="max-w-4xl mx-auto px-6">
+            <h2 class="text-3xl font-bold text-white mb-12 flex items-center gap-3">
+                <i data-lucide="briefcase" class="w-8 h-8 text-cyan-400"></i> Professional Experience
+            </h2>
+            <div class="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-700 before:to-transparent">
+                
+                <!-- Item 1 -->
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-slate-700 bg-slate-900 group-hover:bg-cyan-500/20 group-hover:border-cyan-500/50 transition-colors shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-xl">
+                        <i data-lucide="cpu" class="w-5 h-5 text-cyan-400"></i>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] glass p-6 rounded-2xl hover-lift">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+                            <h3 class="font-bold text-white text-lg">VoIP AI Integration Engineer</h3>
+                            <span class="text-xs font-semibold text-cyan-400 bg-cyan-500/10 px-2 py-1 rounded">Dec 2025</span>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-3">Basal Analytics Pvt. Ltd. (desible.ai)</p>
+                        <p class="text-slate-500 text-sm leading-relaxed">Configured Asterisk PBX with AudioSocket module and wrote Python WebSocket clients bridging live calls to AI voice engines. Deployed on AWS EC2 with SIP trunk setup.</p>
+                    </div>
+                </div>
 
-    <button type="submit">Send message</button>
-    <p data-contact-status role="status" aria-live="polite"></p>
-  </form>
-</section>
+                <!-- Item 2 -->
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-slate-700 bg-slate-900 group-hover:bg-cyan-500/20 group-hover:border-cyan-500/50 transition-colors shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-xl">
+                        <i data-lucide="bot" class="w-5 h-5 text-cyan-400"></i>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] glass p-6 rounded-2xl hover-lift">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+                            <h3 class="font-bold text-white text-lg">AI Backend Developer</h3>
+                            <span class="text-xs font-semibold text-cyan-400 bg-cyan-500/10 px-2 py-1 rounded">Oct 2025 – Jan 2026</span>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-3">Raiva (Germany)</p>
+                        <p class="text-slate-500 text-sm leading-relaxed">Built a document indexing and search portal with semantic NLP and real-time voice chat. Integrated OpenAI API and Whisper for voice-to-text on Hetzner Cloud.</p>
+                    </div>
+                </div>
 
+                <!-- Item 3 -->
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-slate-700 bg-slate-900 group-hover:bg-cyan-500/20 group-hover:border-cyan-500/50 transition-colors shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-xl">
+                        <i data-lucide="phone" class="w-5 h-5 text-cyan-400"></i>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] glass p-6 rounded-2xl hover-lift">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+                            <h3 class="font-bold text-white text-lg">VoIP Engineer</h3>
+                            <span class="text-xs font-semibold text-cyan-400 bg-cyan-500/10 px-2 py-1 rounded">Aug 2025 – Sep 2025</span>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-3">Lancelot Technology</p>
+                        <p class="text-slate-500 text-sm leading-relaxed">Configured Asterisk and Kamailio PBX across two Ubuntu servers with a custom admin panel. Designed multilingual IVR with voice/language detection.</p>
+                    </div>
+                </div>
 
+                <!-- Item 4 -->
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-slate-700 bg-slate-900 group-hover:bg-cyan-500/20 group-hover:border-cyan-500/50 transition-colors shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-xl">
+                        <i data-lucide="globe" class="w-5 h-5 text-cyan-400"></i>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] glass p-6 rounded-2xl hover-lift">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+                            <h3 class="font-bold text-white text-lg">VoIP & PBX Engineer</h3>
+                            <span class="text-xs font-semibold text-cyan-400 bg-cyan-500/10 px-2 py-1 rounded">May 2025 – Jun 2025</span>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-3">IWALINK SA (Switzerland)</p>
+                        <p class="text-slate-500 text-sm leading-relaxed">Configured Asterisk PBX on hosted hardware. Wrote Bash automation and Python AGI programs for dynamic call routing and IVR intelligence.</p>
+                    </div>
+                </div>
 
+                <!-- Item 5 -->
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-slate-700 bg-slate-900 group-hover:bg-cyan-500/20 group-hover:border-cyan-500/50 transition-colors shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-xl">
+                        <i data-lucide="network" class="w-5 h-5 text-cyan-400"></i>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] glass p-6 rounded-2xl hover-lift">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+                            <h3 class="font-bold text-white text-lg">Network Associate</h3>
+                            <span class="text-xs font-semibold text-cyan-400 bg-cyan-500/10 px-2 py-1 rounded">Jan 2022 – Aug 2025</span>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-3">TELUS Digital (Canada) · Remote</p>
+                        <p class="text-slate-500 text-sm leading-relaxed">Command-based programming and troubleshooting of GTD 5 and DMS 100 telephony switches. Resolved SIP/ISUP call issues using Wireshark and IRIS.</p>
+                    </div>
+                </div>
 
+            </div>
+        </div>
+    </section>
 
+    <!-- Projects -->
+    <section id="projects" class="py-24 bg-slate-950/50">
+        <div class="max-w-6xl mx-auto px-6">
+            <h2 class="text-3xl font-bold text-white mb-12 flex items-center gap-3">
+                <i data-lucide="folder-git-2" class="w-8 h-8 text-cyan-400"></i> Featured Projects
+            </h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Project 1 -->
+                <div class="glass p-6 rounded-2xl hover-lift flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="radio" class="w-8 h-8 text-cyan-400"></a>
+                        <a href="https://github.com/S-V-J" target="_blank" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="github" class="w-5 h-5"></i></a>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">PBX-Platform</h3>
+                    <p class="text-slate-400 text-sm mb-4 flex-grow">Private, multi-tenant telecom infrastructure core driven by a highly normalized 12-microservice, 76-table database schema with Kamailio SIP proxy load balancers.</p>
+                    <div class="flex flex-wrap gap-2 mt-auto">
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">Asterisk</span>
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">Kamailio</span>
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">FastAPI</span>
+                    </div>
+                </div>
 
-<script src="assets/js/config.js"></script>
-<script src="assets/js/contact.js"></script>
+                <!-- Project 2 -->
+                <div class="glass p-6 rounded-2xl hover-lift flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="mic" class="w-8 h-8 text-cyan-400"></i>
+                        <a href="https://github.com/S-V-J" target="_blank" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="github" class="w-5 h-5"></i></a>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">OminiVoice</h3>
+                    <p class="text-slate-400 text-sm mb-4 flex-grow">In-browser WebRTC testing workbench providing instant audio loopbacks and transcripts. Multi-tenant lead dialing queues with Celery and Stripe billing.</p>
+                    <div class="flex flex-wrap gap-2 mt-auto">
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">FastAPI</span>
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">React</span>
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">Pipecat</span>
+                    </div>
+                </div>
 
-</body></html>
+                <!-- Project 3 -->
+                <div class="glass p-6 rounded-2xl hover-lift flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="map" class="w-8 h-8 text-cyan-400"></i>
+                        <a href="https://github.com/S-V-J" target="_blank" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="github" class="w-5 h-5"></i></a>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">FuelRoute Pro</h3>
+                    <p class="text-slate-400 text-sm mb-4 flex-grow">Greedy cost-optimization engine processing live map geometry to locate cheapest fuel stops. Scaled to sub-30ms execution via SHA-256 coordinate caching.</p>
+                    <div class="flex flex-wrap gap-2 mt-auto">
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">Django</span>
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">OSRM</span>
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">Redis</span>
+                    </div>
+                </div>
+
+                <!-- Project 4 -->
+                <div class="glass p-6 rounded-2xl hover-lift flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="terminal" class="w-8 h-8 text-cyan-400"></i>
+                        <a href="https://github.com/S-V-J" target="_blank" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="github" class="w-5 h-5"></i></a>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">MyCode</h3>
+                    <p class="text-slate-400 text-sm mb-4 flex-grow">Autonomous agentic coding CLI & TUI utilizing local text embeddings for semantic caching. Tree-sitter codebase indexing for surgical prompt context targeting.</p>
+                    <div class="flex flex-wrap gap-2 mt-auto">
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">Python</span>
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">ChromaDB</span>
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">Tree-sitter</span>
+                    </div>
+                </div>
+
+                <!-- Project 5 -->
+                <div class="glass p-6 rounded-2xl hover-lift flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="sprout" class="w-8 h-8 text-cyan-400"></i>
+                        <a href="https://github.com/S-V-J" target="_blank" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="github" class="w-5 h-5"></i></a>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Sasyashri</h3>
+                    <p class="text-slate-400 text-sm mb-4 flex-grow">Multi-tenant B2B agri-wholesale marketplace with 8 role-based portals. Features low-latency streaming AI voice agents via NVIDIA Riva and OCR invoice parsing.</p>
+                    <div class="flex flex-wrap gap-2 mt-auto">
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">Next.js</span>
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">NestJS</span>
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">NVIDIA Riva</span>
+                    </div>
+                </div>
+
+                <!-- Project 6 -->
+                <div class="glass p-6 rounded-2xl hover-lift flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="book-open" class="w-8 h-8 text-cyan-400"></i>
+                        <a href="https://github.com/S-V-J" target="_blank" class="text-slate-400 hover:text-white transition-colors"><i data-lucide="github" class="w-5 h-5"></i></a>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Zero to Hero</h3>
+                    <p class="text-slate-400 text-sm mb-4 flex-grow">Massive open-source curriculum detailing 10 enterprise builds spanning secure SIP routing, WebRTC, and OWASP Top 10 defense with multi-stage Docker optimization.</p>
+                    <div class="flex flex-wrap gap-2 mt-auto">
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">DevSecOps</span>
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">Docker</span>
+                        <span class="text-xs px-2 py-1 rounded bg-slate-800 text-cyan-400 border border-slate-700">Documentation</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-24">
+        <div class="max-w-3xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-white mb-4 flex items-center justify-center gap-3">
+                    <i data-lucide="mail" class="w-8 h-8 text-cyan-400"></i> Get In Touch
+                </h2>
+                <p class="text-slate-400">Have a project in mind or want to discuss VoIP/AI infrastructure? Send me a message.</p>
+            </div>
+            
+            <div class="glass p-8 rounded-2xl">
+                <form id="contact-form" class="space-y-6" novalidate>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="full_name" class="block text-sm font-medium text-slate-300 mb-2">Name</label>
+                            <input type="text" id="full_name" name="full_name" required maxlength="120" 
+                                class="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                                placeholder="John Doe">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-slate-300 mb-2">Email</label>
+                            <input type="email" id="email" name="email" required maxlength="254" 
+                                class="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                                placeholder="john@example.com">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-slate-300 mb-2">Message</label>
+                        <textarea id="message" name="message" required maxlength="5000" rows="5" 
+                            class="w-full px-4 py-3 rounded-lg bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all resize-none"
+                            placeholder="Tell me about your project..."></textarea>
+                    </div>
+                    
+                    <!-- Honeypot for spam protection (hidden via JS, but kept in HTML for structure) -->
+                    <input type="text" name="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;height:0;width:0;opacity:0;pointer-events:none">
+                    
+                    <button type="submit" class="w-full py-3.5 rounded-lg bg-cyan-500 text-slate-950 font-bold hover:bg-cyan-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span>Send Message</span>
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                    </button>
+                    
+                    <p data-contact-status role="status" aria-live="polite" class="text-center text-sm font-medium mt-4"></p>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-8 border-t border-slate-800/50 bg-slate-950">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
+            <p>&copy; 2026 Siddhant Kumar. All rights reserved.</p>
+            <div class="flex items-center gap-6">
+                <a href="https://github.com/S-V-J" target="_blank" class="hover:text-cyan-400 transition-colors flex items-center gap-2">
+                    <i data-lucide="github" class="w-4 h-4"></i> GitHub
+                </a>
+                <a href="https://linkedin.com/in/sid-093" target="_blank" class="hover:text-cyan-400 transition-colors flex items-center gap-2">
+                    <i data-lucide="linkedin" class="w-4 h-4"></i> LinkedIn
+                </a>
+                <a href="mailto:stjl093@gmail.com" class="hover:text-cyan-400 transition-colors flex items-center gap-2">
+                    <i data-lucide="mail" class="w-4 h-4"></i> Email
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+    </script>
+    <script src="assets/js/contact.js"></script>
+</body>
+</html>
