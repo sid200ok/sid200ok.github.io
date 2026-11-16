@@ -1,27 +1,35 @@
-# dependencies / build output
 node_modules/
 dist/
+build/
+.cache/
 *.tsbuildinfo
 
-# secrets and local env — never commit real values
 .env
 .env.*
 !.env.example
 *.local
 
-# generated browser config
+# generated artifacts (CI rebuilds these)
 assets/js/config.js
 assets/js/config.js.tmp
+assets/css/app.css
 
-# local sid runtime state
+# policy backups / local state
+*.bak
+*.bak.*
+.gitleaks.toml.bak.*
+.gitleaksignore
 .sid.pid
 .sid.port
 .sid.log
+.portrox/
 
-# editor / OS noise
 .DS_Store
 Thumbs.db
 npm-debug.log*
 yarn-error.log*
 *.log
-.cache/
+__pycache__/
+.venv/
+supabase/.temp/
+supabase/.branches/

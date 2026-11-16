@@ -1,23 +1,22 @@
-name: Supabase Keep-Alive
+name: supabase-keepalive
 on:
-  schedule:
-    - cron: '0 3 * * 1' # Every Monday at 03:00 UTC
-  workflow_dispatch: {} # Allows manual triggering
+  schedule: [{ cron: '0 3 * * 1' }]
+  workflow_dispatch:
+permissions: {}
 jobs:
   ping:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - name: Ping Supabase Database to prevent idle pause
+      - name: Ping Supabase REST (prevents free-tier idle pause)
+        env:
+          URL: ${{ secrets.SUPABASE_URL }}
+          KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          # Query the projects table. Now that grants are fixed, this will return 200 OK.
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            "${{ vars.SUPABASE_URL }}/rest/v1/projects?select=id&limit=1")
-
-          echo "Supabase DB Ping HTTP Status: $HTTP_CODE"
-          if [ "$HTTP_CODE" -ne 200 ]; then
-            echo "❌ Failed to ping Supabase DB. Status: $HTTP_CODE"
-            exit 1
-          fi
-          echo "✅ Supabase keep-alive ping successful!"
+          set -euo pipefail
+          [ -n "$URL" ] && [ -n "$KEY" ] || { echo "::error::missing SUPABASE_URL / SUPABASE_ANON_KEY secrets"; exit 1; }
+          code="$(curl -sS -o /dev/null -w '%{http_code}' \
+            -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
+            "$URL/rest/v1/projects?select=id&limit=1")"
+          echo "HTTP $code"
+          [ "$code" = "200" ] || { echo "::error::keepalive failed ($code)"; exit 1; }

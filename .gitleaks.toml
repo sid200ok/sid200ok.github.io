@@ -1,15 +1,47 @@
-title = "sid200ok.github.io gitleaks config"
+title = "strict policy v3 — non-capturing, match-scoped, fixture-aware"
 
 [extend]
 useDefault = true
 
+# NEVER allowlist .env / dist/ / config.js / supabase/config.toml by PATH.
+# A path allowlist suppresses the WHOLE file and blinds the scanner.
 [allowlist]
-description = "Ignore local env and config files (supports Docker /scan/ paths)"
+description = "vendored trees + public publishable keys + known synthetic fixtures"
+regexTarget = "match"
 paths = [
-  '''(^|/)\.env$''',
-  '''(^|/)\.env\.example$''',
-  '''(^|/)assets/js/config\.template\.js$''',
-  '''(^|/)assets/js/config\.js$''',
-  '''(^|/)assets/js/config\.js\.tmp$''',
-  '''(^|/)supabase/config\.toml$''',
+  '''(^|/)node_modules/''',
+  '''(^|/)\.git/''',
+  '''(^|/)\.venv/''',
+  '''(^|/)__pycache__/''',
+  '''(^|/)\.gitleaks\.toml$''',
+  '''(^|/)\.gitleaks\.toml\.bak\.''',
+  '''(^|/)\.gitleaksignore$''',
 ]
+regexes = [
+  '''(?i)SUPABASE_ANON_KEY\s*[:=]\s*["']?sb_(?:publishable|anon)_[A-Za-z0-9_-]+''',
+  '''sb_(?:publishable|anon)_[A-Za-z0-9_-]{10,}''',
+]
+# Synthetic probe passwords previously committed as literals. Provably fake
+# (hosts are example.supabase.co / .invalid). Muted by STOPWORD, not by path.
+stopwords = [
+  "REPLACE_ME","PLACEHOLDER","EXAMPLEKEY","changeme","<your-","000000000000",
+  "Sup3rS3cretPassw0rd","Str0ngP@ss","Pr0bePassw0rdX"
+]
+
+[[rules]]
+id = "supabase-secret-key"
+description = "Supabase SECRET / service key — never commit"
+regex = '''sb_(?:secret|service)_[A-Za-z0-9_-]{10,}'''
+keywords = ["sb_secret_","sb_service_"]
+
+[[rules]]
+id = "supabase-jwt"
+description = "Supabase-style JWT"
+regex = '''eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}'''
+keywords = ["eyJ"]
+
+[[rules]]
+id = "postgres-dsn-password"
+description = "Postgres DSN carrying a password"
+regex = '''postgres(?:ql)?://[^\s:@/]{1,64}:[^\s:@/]{4,128}@[^\s/?'"]{1,255}'''
+keywords = ["postgres://","postgresql://"]

@@ -1,67 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$REPO_ROOT"
-
-# 1. Ensure contact form + script order in index.html
-if [[ -f scripts/ensure-contact-ui.mjs ]]; then
-  node scripts/ensure-contact-ui.mjs
-fi
-
-# 2. Generate fresh config.js (fails hard if env/keys missing)
-rm -f assets/js/config.js assets/js/config.js.tmp
+node scripts/prepare-html.mjs
 node scripts/inject-config.mjs
+npx tailwindcss -i assets/css/input.css -o assets/css/app.css --minify
 
-# 3. Build dist/
-rm -rf dist
-mkdir -p dist
-
+rm -rf dist && mkdir -p dist/assets/css dist/assets/js
 cp index.html dist/
-
-mkdir -p dist/assets/js
-cp assets/js/contact.js   dist/assets/js/
-cp assets/js/config.js    dist/assets/js/
-
-for item in assets/*/; do
-  [[ "$item" == "assets/js/" ]] && continue
-  cp -R "$item" "dist/${item}"
-done
-
-for f in assets/js/*; do
-  base="$(basename "$f")"
-  [[ "$base" == "config.template.js" ]] && continue
-  [[ "$base" == "config.js.tmp" ]]      && continue
-  [[ "$base" == "contact.js" ]]         && continue
-  [[ "$base" == "config.js" ]]          && continue
-  cp "$f" "dist/assets/js/$base"
-done
-
-if [[ -d public ]]; then
-  cp -R public/. dist/
-fi
-
-[[ -f CNAME ]]       && cp CNAME dist/       || true
-[[ -f robots.txt ]]  && cp robots.txt dist/  || true
-[[ -f sitemap.xml ]] && cp sitemap.xml dist/ || true
-
+cp assets/css/app.css dist/assets/css/
+cp assets/js/config.js assets/js/contact.js dist/assets/js/
+[ -d assets/media ] && cp -R assets/media dist/assets/media || true
+[ -d public ] && cp -R public/. dist/ || true
+for f in CNAME robots.txt sitemap.xml; do [ -f "$f" ] && cp "$f" dist/ || true; done
 touch dist/.nojekyll
 
-# 4. Validate
-if [[ ! -s dist/assets/js/config.js ]]; then
-  echo "ERROR: dist/assets/js/config.js is missing or empty." >&2
-  exit 1
-fi
+[ -s dist/assets/css/app.css ] || { echo "ERROR: app.css missing/empty" >&2; exit 1; }
+[ -s dist/assets/js/config.js ] || { echo "ERROR: config.js missing/empty" >&2; exit 1; }
+grep -q '__SUPABASE' dist/assets/js/config.js && { echo "ERROR: placeholders remain" >&2; exit 1; } || true
+grep -qE 'sb_(secret|service)_' dist/assets/js/config.js && { echo "ERROR: secret key in bundle" >&2; exit 1; } || true
+grep -q 'cdn.tailwindcss.com' dist/index.html && { echo "ERROR: Tailwind CDN still present" >&2; exit 1; } || true
+[ -f dist/assets/js/config.template.js ] && { echo "ERROR: template leaked" >&2; exit 1; } || true
 
-if grep -q '__SUPABASE' dist/assets/js/config.js; then
-  echo "ERROR: dist/assets/js/config.js still contains placeholders." >&2
-  exit 1
-fi
-
-if [[ -f dist/assets/js/config.template.js ]]; then
-  echo "ERROR: config.template.js must not be in dist/." >&2
-  rm -f dist/assets/js/config.template.js
-  exit 1
-fi
-
-echo "✔ Built clean static artifact in dist/"
+echo "✔ dist built: $(find dist -type f | wc -l) files, $(du -sb dist | cut -f1) bytes"

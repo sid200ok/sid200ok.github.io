@@ -1,68 +1,48 @@
 #!/usr/bin/env bash
-# gitleaks-staged.sh — scan ONLY the git index (what becomes immutable history)
+# Scan ONLY the git index (what becomes immutable history).
+# Native gitleaks binary; no Docker; no dependence on deprecated protect/--staged.
 # Exit: 0 clean | 1 leak (commit blocked) | 2 harness failure
 set -euo pipefail
+export PATH="$HOME/.local/bin:$PATH"
+log(){ printf '%s\n' "$*" >&2; }
+die(){ log "gitleaks-staged: $*"; exit 2; }
 
-GITLEAKS_VERSION="${GITLEAKS_VERSION:-latest}"
-TZ="${TZ:-Asia/Kolkata}"
-readonly IMAGE="zricethezav/gitleaks:${GITLEAKS_VERSION}"
-readonly CONFIG_REL=".gitleaks.toml"
-
-log() { printf '%s\n' "$*" >&2; }
-die() { log "gitleaks-staged: $*"; exit 2; }
-
-command -v git    >/dev/null 2>&1 || die "git not found"
-command -v docker >/dev/null 2>&1 || die "docker not found"
+command -v gitleaks >/dev/null 2>&1 || die "gitleaks not on PATH (run Step 2)"
+command -v git      >/dev/null 2>&1 || die "git not found"
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "not a git work tree"
+[ -f .gitleaks.toml ] || die "missing .gitleaks.toml"
 
 files=()
-if [ "$#" -gt 0 ]; then
-  for f in "$@"; do files+=("$f"); done
+if [ "$#" -gt 0 ]; then files=("$@")
 else
-  while IFS= read -r line; do [ -n "$line" ] && files+=("$line"); done \
+  while IFS= read -r l; do [ -n "$l" ] && files+=("$l"); done \
     < <(git diff --cached --name-only --diff-filter=ACMR)
 fi
-[ "${#files[@]}" -gt 0 ] || { log "gitleaks-staged: nothing staged — skipping."; exit 0; }
+[ "${#files[@]}" -gt 0 ] || { log "gitleaks-staged: nothing staged."; exit 0; }
 
-stage_dir="$(mktemp -d "${TMPDIR:-/tmp}/gitleaks-staged.XXXXXX")"
-trap 'rm -rf "$stage_dir"' EXIT INT TERM
+stage="$(mktemp -d "${TMPDIR:-/tmp}/gl-staged.XXXXXX")"
+trap 'rm -rf "$stage"' EXIT INT TERM
 
-count=0
+n=0
 for f in "${files[@]}"; do
   git ls-files --error-unmatch "$f" >/dev/null 2>&1 || continue
   mode="$(git ls-files -s -- "$f" | awk '{print $1; exit}')"
-  case "$mode" in
-    100644|100755|100664) : ;;
-    *) continue ;;
-  esac
-  out="${stage_dir}/${f}"
-  mkdir -p "$(dirname "$out")"
-  if git show ":${f}" >"$out" 2>/dev/null; then
-    # Safe increment: $(( )) always returns 0; (( count++ )) returns 1 at 0->1
-    # boundary and would abort under set -e.
-    count=$(( count + 1 ))
-  fi
+  case "$mode" in 100644|100755|100664) : ;; *) continue ;; esac
+  out="$stage/$f"; mkdir -p "$(dirname "$out")"
+  if git show ":$f" >"$out" 2>/dev/null; then n=$(( n + 1 )); fi
 done
-[ "$count" -gt 0 ] || { log "gitleaks-staged: no scannable staged blobs — skipping."; exit 0; }
+[ "$n" -gt 0 ] || { log "gitleaks-staged: no scannable blobs."; exit 0; }
 
-[ -f "$CONFIG_REL" ] || die "missing ${CONFIG_REL} at repo root"
-config_abs="$(pwd)/${CONFIG_REL}"
-log "gitleaks-staged: scanning ${count} staged file(s) via ${IMAGE}"
-
+log "gitleaks-staged: scanning $n staged file(s)"
 set +e
-docker run --rm -e "TZ=${TZ}" \
-  -v "${stage_dir}:/scan:ro" \
-  -v "${config_abs}:/cfg/.gitleaks.toml:ro" \
-  "$IMAGE" dir /scan --config /cfg/.gitleaks.toml --redact --no-banner --exit-code 1
+gitleaks dir "$stage" --config "$PWD/.gitleaks.toml" --redact --no-banner --exit-code 1
 rc=$?
 set -e
-
 case "$rc" in
-  0) log "✔ gitleaks-staged: clean (${count} file(s))"; exit 0 ;;
-  1) log ""; log "✖ SECRET IN STAGED CONTENT — COMMIT BLOCKED."
-     log "  Real credential -> rotate, delete, load from gitignored .env."
-     log "  False positive  -> TARGETED rule-level allowlist in .gitleaks.toml."
-     log "  NEVER blanket-allowlist .env / config.js / dist/: it blinds the whole scan."
+  0) log "✔ clean ($n files)"; exit 0 ;;
+  1) log "✖ SECRET IN STAGED CONTENT — COMMIT BLOCKED."
+     log "  real credential -> rotate, remove, load from gitignored .env"
+     log "  false positive  -> targeted regex allowlist, NEVER a secret-bearing path"
      exit 1 ;;
-  *) log "✖ gitleaks-staged: harness failure (exit ${rc}) — config or Docker problem."; exit 2 ;;
+  *) log "✖ harness failure (exit $rc)"; exit 2 ;;
 esac

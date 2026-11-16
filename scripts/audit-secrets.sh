@@ -1,85 +1,66 @@
 #!/usr/bin/env bash
-# audit-secrets.sh — Phase0 positive control | Phase1 tree (dir) | Phase2 history (git)
-# Exit: 0 clean | 1 leak found | 2 harness failure (results untrustworthy)
+# Phase 0 positive control | Phase 1 tree | Phase 2 full history
+# Native binary. Probe assembled at RUNTIME from fragments on SEPARATE lines,
+# so this source file never contains a detectable literal.
+# Exit: 0 clean | 1 leak | 2 harness failure
 set -euo pipefail
+export PATH="$HOME/.local/bin:$PATH"
+CFG="$PWD/.gitleaks.toml"
+log(){ printf '%s\n' "$*" >&2; }
+hdr(){ printf '\n== %s ==\n' "$*" >&2; }
+die(){ log "audit: $*"; exit 2; }
+command -v gitleaks >/dev/null 2>&1 || die "gitleaks not on PATH"
+[ -f "$CFG" ] || die "missing $CFG"
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "not a git repo"
 
-GITLEAKS_VERSION="${GITLEAKS_VERSION:-latest}"
-TZ="${TZ:-Asia/Kolkata}"
-MIN_BYTES="${MIN_BYTES:-200000}"
-readonly IMAGE="zricethezav/gitleaks:${GITLEAKS_VERSION}"
-readonly REPO_DIR="$(pwd)"
-readonly CONFIG_ABS="${REPO_DIR}/.gitleaks.toml"
-
-log() { printf '%s\n' "$*" >&2; }
-hdr() { printf '\n\033[1m── %s ──\033[0m\n' "$*" >&2; }
-die() { log "audit-secrets: $*"; exit 2; }
-
-command -v docker >/dev/null 2>&1 || die "docker not found"
-command -v git    >/dev/null 2>&1 || die "git not found"
-git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "not a git work tree"
-[ -f "$CONFIG_ABS" ] || die "missing ${CONFIG_ABS}"
-
-WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/gitleaks-audit.XXXXXX")"
-trap 'rm -rf "$WORK_DIR"' EXIT INT TERM
-
-gl_dir() {
-  docker run --rm -e "TZ=${TZ}" -v "$1:/scan:ro" -v "${CONFIG_ABS}:/cfg/.gitleaks.toml:ro" \
-    "$IMAGE" dir /scan --config /cfg/.gitleaks.toml --redact --no-banner --exit-code 1
-}
-gl_git() {
-  docker run --rm -e "TZ=${TZ}" -v "$1:/scan:ro" -v "${CONFIG_ABS}:/cfg/.gitleaks.toml:ro" \
-    "$IMAGE" git /scan --config /cfg/.gitleaks.toml --log-opts=--all --redact --no-banner --exit-code 1
-}
-
+W="$(mktemp -d "${TMPDIR:-/tmp}/gl-audit.XXXXXX")"
+trap 'rm -rf "$W"' EXIT INT TERM
 overall=0
 
-hdr "Phase 0 — positive control (MUST fire, else every clean result is worthless)"
-probe="${WORK_DIR}/probe"; mkdir -p "$probe"
-cat > "${probe}/planted.txt" <<'PLANT'
-aws_access_key_id = AKIAIOSFODNN7EXAMPLE
-aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-supabase_service_role = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.PLANTCTRL.PLANTCTRLSIGNATUREVALUE00
-postgres://audit_user:Sup3rS3cretPassw0rd@dbs.example.supabase.co:5432/postgres
-PLANT
-set +e; gl_dir "$probe" >/dev/null 2>&1; probe_rc=$?; set -e
-if [ "$probe_rc" -eq 1 ]; then
-  log "✔ positive control fired (exit 1) — scanner is working"
-elif [ "$probe_rc" -eq 0 ]; then
-  log "✖ POSITIVE CONTROL PASSED SILENTLY — scanner is NOT detecting."; log "  Over-broad allowlist in .gitleaks.toml. Aborting."; exit 2
-else
-  log "✖ harness failure during positive control (exit ${probe_rc}) — config likely does not parse."; exit 2
-fi
+hdr "Phase 0 - positive control (MUST fire)"
+mkdir -p "$W/probe"
+# High-entropy, non-dictionary, NOT in stopwords -> trips postgres-dsn-password,
+# a custom rule with no allowlist. AWS docs example key is NOT usable as a probe.
+P1='postgres://probe_user'
+P2=':K7qR2mX9vT4wZ8pL'
+P3='@db.example.invalid:5432/postgres'
+printf 'DATABASE_URL=%s%s%s\n' "$P1" "$P2" "$P3" > "$W/probe/planted.txt"
+set +e
+gitleaks dir "$W/probe" --config "$CFG" --redact --no-banner --exit-code 1 >/dev/null 2>&1
+p=$?
+set -e
+if [ "$p" -eq 1 ]; then log "OK probe fired"
+elif [ "$p" -eq 0 ]; then log "FAIL probe silent - allowlist too broad"; exit 2
+else log "FAIL probe harness error ($p)"; exit 2; fi
 
-hdr "Phase 1 — working tree (gitleaks dir)"
-set +e; tree_out="$(gl_dir "$REPO_DIR" 2>&1)"; tree_rc=$?; set -e
-printf '%s\n' "$tree_out" >&2
-scanned_bytes="$(printf '%s' "$tree_out" | sed -n 's/.*scanned ~\([0-9]*\) bytes.*/\1/p' | head -n1)"
-if [ -n "$scanned_bytes" ]; then
-  log "bytes scanned: ${scanned_bytes} (floor ${MIN_BYTES})"
-  [ "$scanned_bytes" -ge "$MIN_BYTES" ] || log "⚠ scan very small — confirm you are not allowlisting real source"
-fi
-case "$tree_rc" in
-  0) log "✔ working tree clean" ;;
-  1) log "✖ LEAK IN WORKING TREE"; overall=1 ;;
-  *) log "✖ harness failure phase 1 (exit ${tree_rc})"; overall=2 ;;
+hdr "Phase 1 - working tree"
+set +e
+gitleaks dir "$PWD" --config "$CFG" --redact --no-banner --exit-code 1 \
+  --report-format json --report-path "$W/tree.json" >&2
+rc=$?
+set -e
+cp -f "$W/tree.json" /tmp/gl-tree.json 2>/dev/null || true
+case "$rc" in
+  0) log "OK tree clean" ;;
+  1) log "FAIL leak in tree"; overall=1 ;;
+  *) log "FAIL tree harness ($rc)"; overall=2 ;;
 esac
 
-hdr "Phase 2 — full git history (gitleaks git --log-opts=--all)"
-if [ -d "${REPO_DIR}/.git" ]; then
-  set +e; gl_git "$REPO_DIR" >&2; hist_rc=$?; set -e
-  case "$hist_rc" in
-    0) log "✔ history clean" ;;
-    1) log "✖ LEAK IN GIT HISTORY — deleting the file does NOT remove it."; log "  Rotate the key, then git filter-repo + force-push."; overall=1 ;;
-    *) log "✖ harness failure phase 2 (exit ${hist_rc})"; overall=2 ;;
-  esac
-else
-  log "⚠ no .git — history scan skipped"
-fi
+hdr "Phase 2 - full git history"
+set +e
+gitleaks git "$PWD" --config "$CFG" --log-opts=--all --redact --no-banner --exit-code 1 \
+  --report-format json --report-path "$W/hist.json" >&2
+h=$?
+set -e
+cp -f "$W/hist.json" /tmp/gl-hist.json 2>/dev/null || true
+case "$h" in
+  0) log "OK history clean" ;;
+  1) log "FAIL leak in history"; overall=1 ;;
+  *) log "FAIL history harness ($h)"; overall=2 ;;
+esac
 
 hdr "Summary"
-case "$overall" in
-  0) log "✔ AUDIT CLEAN — tree + history + positive control all verified" ;;
-  1) log "✖ AUDIT FAILED — secret material found" ;;
-  2) log "✖ AUDIT INVALID — harness problem, do not trust results" ;;
-esac
+if [ "$overall" -eq 0 ]; then log "AUDIT CLEAN"
+elif [ "$overall" -eq 1 ]; then log "AUDIT FAILED - run: node scripts/triage.mjs"
+else log "AUDIT INVALID"; fi
 exit "$overall"

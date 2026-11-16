@@ -5,15 +5,19 @@
   "type": "module",
   "description": "Personal portfolio — sid200ok.github.io",
   "scripts": {
-    "env:check":  "bash scripts/env-bootstrap.sh",
-    "config":     "node scripts/inject-config.mjs",
-    "ui:ensure":  "node scripts/ensure-contact-ui.mjs",
-    "build":      "bash scripts/build-pages.sh",
-    "smoke":      "bash scripts/smoke-test.sh",
-    "db:push":    "npx supabase db push --remote",
-    "scan":       "docker run --rm -v \"$PWD:/repo\" zricethezav/gitleaks:latest detect --no-git --source /repo --redact --config /repo/.gitleaks.toml --exit-code 1"
+    "env:check": "bash scripts/env-bootstrap.sh",
+    "config": "node scripts/inject-config.mjs",
+    "ui:ensure": "node scripts/ensure-contact-ui.mjs",
+    "build": "bash scripts/build-pages.sh",
+    "smoke": "bash scripts/smoke-test.sh",
+    "db:push": "npx supabase db push --remote",
+    "scan": "docker run --rm -v \"$PWD:/repo\" zricethezav/gitleaks:latest detect --no-git --source /repo --redact --config /repo/.gitleaks.toml --exit-code 1"
   },
   "devDependencies": {
-    "supabase": "^2.22.9"
+    "supabase": "^2.22.9",
+    "tailwindcss": "^3.4.17"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
