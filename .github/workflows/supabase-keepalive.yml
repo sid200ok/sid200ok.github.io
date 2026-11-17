@@ -14,9 +14,10 @@ jobs:
           KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           set -euo pipefail
-          [ -n "$URL" ] && [ -n "$KEY" ] || { echo "::error::missing SUPABASE_URL / SUPABASE_ANON_KEY secrets"; exit 1; }
+          [ -n "$URL" ] && [ -n "$KEY" ] || { echo "::error::missing SUPABASE_URL / SUPABASE_ANON_KEY"; exit 1; }
+          # contact_messages, NOT projects: Portrox renamed projects -> legacy_projects.
           code="$(curl -sS -o /dev/null -w '%{http_code}' \
             -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
-            "$URL/rest/v1/projects?select=id&limit=1")"
+            "$URL/rest/v1/contact_messages?select=id&limit=1")"
           echo "HTTP $code"
           [ "$code" = "200" ] || { echo "::error::keepalive failed ($code)"; exit 1; }
