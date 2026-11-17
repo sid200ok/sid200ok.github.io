@@ -1,5 +1,5 @@
 minimum_pre_commit_version: "3.5.0"
-exclude: '^(assets/css/app\.css|assets/js/config\.js|dist/|package-lock\.json)'
+# NO top-level exclude: it would blind gitleaks too.
 repos:
   - repo: local
     hooks:
@@ -22,9 +22,12 @@ repos:
         args: ["--maxkb=1024"]
       - id: detect-private-key
       - id: check-merge-conflict
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-        args: ["--markdown-linebreak-ext=md"]
       - id: check-toml
       - id: check-yaml
       - id: check-json
+      # Mutating formatters ONLY are excluded from generated artifacts.
+      - id: end-of-file-fixer
+        exclude: '^(assets/css/app\.css|assets/js/config\.js|dist/|package-lock\.json)'
+      - id: trailing-whitespace
+        args: ["--markdown-linebreak-ext=md"]
+        exclude: '^(assets/css/app\.css|assets/js/config\.js|dist/|package-lock\.json)'
