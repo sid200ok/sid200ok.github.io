@@ -1,6 +1,12 @@
 name: supabase-keepalive
+# Supabase FREE projects pause after 1 week of inactivity. Any REST query counts
+# as activity. Target system_pages: anon-readable by policy, part of the Portrox
+# bootstrap schema (so it exists in EVERY project), no tenant data, never written
+# by visitors. Do NOT target legacy tables that Portrox may drop.
+# NOTE: GitHub disables scheduled workflows after 60 days of repo inactivity;
+# any push re-enables them.
 on:
-  schedule: [{ cron: '0 3 * * 1' }]
+  schedule: [{ cron: '0 3 * * 1,4' }]
   workflow_dispatch:
 permissions: {}
 jobs:
@@ -8,16 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Ping Supabase REST (prevents free-tier idle pause)
+      - name: Ping Supabase REST
         env:
           URL: ${{ secrets.SUPABASE_URL }}
           KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           set -euo pipefail
           [ -n "$URL" ] && [ -n "$KEY" ] || { echo "::error::missing SUPABASE_URL / SUPABASE_ANON_KEY"; exit 1; }
-          # contact_messages, NOT projects: Portrox renamed projects -> legacy_projects.
-          code="$(curl -sS -o /dev/null -w '%{http_code}' \
+          code="$(curl -sS -o /tmp/ka.json -w '%{http_code}' \
             -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
-            "$URL/rest/v1/contact_messages?select=id&limit=1")"
-          echo "HTTP $code"
+            "$URL/rest/v1/system_pages?select=slug&limit=1")"
+          echo "HTTP $code"; head -c 200 /tmp/ka.json; echo
           [ "$code" = "200" ] || { echo "::error::keepalive failed ($code)"; exit 1; }
